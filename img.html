@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday</title>
+    <link rel="stylesheet" href="css/img.css">
+    <style>
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .music-btn:hover {
+            background: #fff;
+            color: #2fc6c8;
+        }
+        .music-btn.playing::after {
+            content: "🎵";
+            font-size: 20px;
+            animation: rotate 2s linear infinite;
+        }
+        .music-btn.paused::after {
+            content: "⏸";
+            font-size: 20px;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+<audio id="bgMusic" src="music/chunfengchui.mp3" autoplay="autoplay" loop="loop" preload="auto"></audio>
+<div id="musicBtn" class="music-btn playing"></div>
+<div class="container">
+    <ul class="img-ul">
+        <li class="img-li"><img src="img/img1.jpg" alt=""></li>
+        <li class="img-li"><img src="img/img2.jpg" alt=""></li>
+        <li class="img-li"><img src="img/img3.jpg" alt=""></li>
+        <li class="img-li"><img src="img/img4.jpg" alt=""></li>
+        <li class="img-li"><img src="img/img5.jpg" alt=""></li>
+        <li class="img-li"><img src="img/img6.jpg" alt=""></li>
+        <li class="img-li"><img src="img/img7.jpg" alt=""></li>
+        <li class="img-li"><img src="img/img8.jpg" alt=""></li>
+    </ul>
+</div>
+<div class="htmleaf-container">
+    <div class="wrapper">
+        <ul class="bg-bubbles">
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+            <li></li>
+        </ul>
+    </div>
+</div>
+
+<script src="js/jquery-3.6.0.min.js"></script>
+<script>
+    // 音乐控制 - 确保在img.js之前执行
+    window.isPlaying = true; // 全局变量以便其他脚本访问
+    $(function() {
+        const music = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('musicBtn');
+
+        // 尝试自动播放
+        function tryAutoPlay() {
+            let playPromise = music.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // 自动播放成功
+                    window.isPlaying = true;
+                    musicBtn.className = 'music-btn playing';
+                }).catch(error => {
+                    // 浏览器阻止了自动播放
+                    console.log("浏览器阻止了自动播放");
+                    window.isPlaying = false;
+                    musicBtn.className = 'music-btn paused';
+                });
+            }
+        }
+
+        // 监听页面可见性变化
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // 页面变为可见时，如果之前是播放状态，就重新播放
+                if (window.isPlaying) {
+                    tryAutoPlay();
+                }
+            }
+        });
+
+        // 监听页面重新获得焦点
+        window.addEventListener('focus', function() {
+            if (window.isPlaying) {
+                tryAutoPlay();
+            }
+        });
+
+        // 初始自动播放
+        tryAutoPlay();
+
+        // 监听音乐播放状态
+        music.addEventListener('playing', function() {
+            window.isPlaying = true;
+            musicBtn.className = 'music-btn playing';
+        });
+
+        music.addEventListener('pause', function() {
+            window.isPlaying = false;
+            musicBtn.className = 'music-btn paused';
+        });
+
+        // 音乐按钮点击事件
+        musicBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡
+            if (window.isPlaying) {
+                music.pause();
+            } else {
+                music.play().then(() => {
+                    window.isPlaying = true;
+                    musicBtn.className = 'music-btn playing';
+                }).catch(error => {
+                    console.log("播放失败", error);
+                });
+            }
+        });
+    });
+</script>
+<script src="js/img.js"></script>
+</body>
+</html>
